@@ -81,7 +81,7 @@ def start_session(hermes, intent_message):
         pprint(session_state.get("slot"))
         mqtt_client.put_mqtt(MQTT_IP_ADDR, MQTT_PORT, 'hermes/tts/say', '{"text": "Rozpoczynam odliczanie", "siteId": "' + session_state.get("siteId") + '"}', MQTT_USER, MQTT_PASS)
         hermes.publish_end_session(session_id, None)
-        os.system('./countdown.py ' + session_state.get("siteId") + ' ' + str(int(session_state.get("slot")[0])) + ' &')
+        os.system('./timer.py ' + session_state.get("siteId") + ' ' + str(int(session_state.get("slot")[0])) + ' &')
 
 with Hermes(MQTT_ADDR) as h:
     h.subscribe_intents(start_session).start()
