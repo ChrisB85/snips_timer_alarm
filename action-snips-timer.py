@@ -2,6 +2,7 @@
 from hermes_python.hermes import Hermes
 from hermes_python.ontology import *
 import paho.mqtt.client as mqtt
+import random
 import os
 import config as c
 import mqtt as mqtt_client
@@ -90,12 +91,13 @@ def start_session(hermes, intent_message):
                 amount = float(c.get_intent_amount(value))
             except ValueError:
                 print("That's not an float!")
-                hermes.publish_end_session(session_id, None)
+                hermes.publish_end_session(session_id, "Przepraszam, nie zrozumiałem")
             total_amount = amount * c.get_unit_multiplier(time_units[key]) + total_amount
         pprint(total_amount)
         session_state["slot"] = intent_slots
 #        pprint(session_state.get("slot"))
-        mqtt_client.put_mqtt(MQTT_IP_ADDR, MQTT_PORT, 'hermes/tts/say', '{"text": "Rozpoczynam odliczanie", "siteId": "' + session_state.get("siteId") + '"}', MQTT_USER, MQTT_PASS)
+        say = ['Rozpoczynam odliczanie', 'Czas start!']
+        mqtt_client.put_mqtt(MQTT_IP_ADDR, MQTT_PORT, 'hermes/tts/say', '{"text": "' + random.choice(say) +  '", "siteId": "' + session_state.get("siteId") + '"}', MQTT_USER, MQTT_PASS)
         hermes.publish_end_session(session_id, None)
         os.system('./timer.py ' + session_state.get("siteId") + ' ' + str(int(total_amount)) + ' &')
 
