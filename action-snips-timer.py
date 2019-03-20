@@ -55,6 +55,7 @@ def save_session_state(sessions_states, session_id, new_state):
 def remove_session_state(sessions_states, session_id):
     sessions_states[session_id] = None
 
+
 def get_intent_site_id(intent_message):
     return intent_message.site_id
 
@@ -74,14 +75,29 @@ def start_session(hermes, intent_message):
 
     # device = intent_message.slots.device.first()
     intent_slots = c.get_intent_slots(intent_message)
-    if len(intent_slots) == 0:
+    time_units = c.get_time_units(intent_message)
+    if len(intent_slots) < len(time_units):
+        intent_slots.insert(0, 1)
+
+    pprint(intent_slots)
+    pprint(time_units)
+    if len(intent_slots) == 0 or len(time_units) == 0:
         hermes.publish_end_session(session_id, None)
     else:
+        total_amount = 0
+        for key, value in enumerate(intent_slots):
+            try:
+                amount = float(c.get_intent_amount(value))
+            except ValueError:
+                print("That's not an float!")
+                hermes.publish_end_session(session_id, None)
+            total_amount = amount * c.get_unit_multiplier(time_units[key]) + total_amount
+        pprint(total_amount)
         session_state["slot"] = intent_slots
-        pprint(session_state.get("slot"))
+#        pprint(session_state.get("slot"))
         mqtt_client.put_mqtt(MQTT_IP_ADDR, MQTT_PORT, 'hermes/tts/say', '{"text": "Rozpoczynam odliczanie", "siteId": "' + session_state.get("siteId") + '"}', MQTT_USER, MQTT_PASS)
         hermes.publish_end_session(session_id, None)
-        os.system('./timer.py ' + session_state.get("siteId") + ' ' + str(int(session_state.get("slot")[0])) + ' &')
+        os.system('./timer.py ' + session_state.get("siteId") + ' ' + str(int(total_amount)) + ' &')
 
 with Hermes(MQTT_ADDR) as h:
     h.subscribe_intents(start_session).start()

@@ -14,7 +14,7 @@ amount = int(sys.argv[2])
 
 time.sleep(amount)
 
-binaryFile = open("./alert.wav", 'rb')
+binaryFile = open("./sounds/rooster_alarm.wav", 'rb')
 wav = bytearray(binaryFile.read())
 
 publish.single("hermes/audioServer/{}/playBytes/123".format(site_id), wav, hostname="localhost", port=1883)
