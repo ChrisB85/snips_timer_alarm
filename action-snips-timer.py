@@ -135,34 +135,28 @@ def format_unit_hour(amount):
     index = amount % 10
     return {
         1: "godzina",
-        5: "godzin",
-        6: "godzin",
-        7: "godzin",
-        8: "godzin",
-        9: "godzin",
-    }.get(index, "godziny")
+        2: "godziny",
+        3: "godziny",
+        4: "godziny"
+    }.get(index, "godzin")
 
 def format_unit_minutes(amount):
     index = amount % 10
     return {
         1: "minuta",
-        5: "minut",
-        6: "minut",
-        7: "minut",
-        8: "minut",
-        9: "minut"
-    }.get(index, "minuty")
+        2: "minuty",
+        3: "minuty",
+        4: "minuty"
+    }.get(index, "minut")
 
 def format_unit_seconds(amount):
     index = amount % 10
     return {
         1: "sekunda",
-        5: "sekund",
-        6: "sekund",
-        7: "sekund",
-        8: "sekund",
-        9: "sekund"
-    }.get(index, "sekundy")
+        2: "sekundy",
+        3: "sekundy",
+        4: "sekundy"
+    }.get(index, "sekund")
 
 def format_amount(amount):
     return {
