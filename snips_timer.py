@@ -36,6 +36,15 @@ def get_time_units(intent_message):
         slots.append(intent_message.slots.time_unit[x].slot_value.value.value)
     return slots
 
+def get_locations(intent_message):
+    slots = []
+    if (intent_message.slots is None):
+        return slots
+    slots_count = len(intent_message.slots.location)
+    for x in range(slots_count):
+        slots.append(intent_message.slots.location[x].slot_value.value.value)
+    return slots
+
 def get_unit_multiplier(unit):
     return {
         "second": 1,

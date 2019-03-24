@@ -30,6 +30,9 @@ def get_intent_msg(intent_message):
 def start_session(hermes, intent_message):
     session_id = intent_message.session_id
     site_id = get_intent_site_id(intent_message)
+    locations = st.get_locations(intent_message)
+    if len(locations) >= 1:
+        site_id = locations[0]
     intent_msg_name = get_intent_msg(intent_message)
 
     if intent_msg_name not in INTENT_FILTER_START_SESSION:
@@ -43,6 +46,7 @@ def start_session(hermes, intent_message):
     time_units = st.get_time_units(intent_message)
     if len(intent_slots) < len(time_units):
         intent_slots.insert(0, 1)
+
     pprint(intent_msg_name)
     pprint(intent_slots)
     pprint(time_units)
