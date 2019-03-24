@@ -1,5 +1,5 @@
 def get_intent_amount(x):
-    print(type(x))
+#    print(type(x))
     if isinstance(x, int):
         return x
     else:

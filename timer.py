@@ -14,7 +14,13 @@ amount = int(sys.argv[2])
 
 time.sleep(amount)
 
-binaryFile = open("./sounds/rooster_alarm.wav", 'rb')
+#filename = "rooster_alarm.wav"
+#filename = "Loud-alarm-clock-sound.wav"
+#filename = "Alarm-clock-sound-short.wav"
+#filename = "Alarm-tone.wav"
+filename = "Mp3-alarm-clock.wav"
+
+binaryFile = open("./sounds/" + filename, 'rb')
 wav = bytearray(binaryFile.read())
 
 publish.single("hermes/audioServer/{}/playBytes/123".format(site_id), wav, hostname="localhost", port=1883)

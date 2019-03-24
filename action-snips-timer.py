@@ -93,13 +93,82 @@ def start_session(hermes, intent_message):
                 print("That's not an float!")
                 hermes.publish_end_session(session_id, "Przepraszam, nie zrozumiałem")
             total_amount = amount * c.get_unit_multiplier(time_units[key]) + total_amount
-        pprint(total_amount)
+#        pprint(total_amount)
+        total_seconds = total_amount
+        days = int(total_amount // 86400)
+        total_amount = total_amount % 86400
+        hours = int(total_amount // 3600)
+        total_amount = total_amount % 3600
+        minutes = int(total_amount // 60)
+        total_amount = total_amount % 60
+        seconds = int(total_amount)
+        print(days)
+        print(hours)
+        print(minutes)
+        print(seconds)
+
+        amount_say = []
+        if days > 0:
+            amount_say.append(str(days) + " " + format_unit_days(days))
+        if hours > 0:
+            amount_say.append(format_amount(hours) + " " + format_unit_hour(hours))
+        if minutes > 0:
+            amount_say.append(format_amount(minutes) + " " + format_unit_minutes(minutes))
+        if seconds > 0:
+            amount_say.append(format_amount(seconds) + " " + format_unit_seconds(seconds))
+        pprint(amount_say)
         session_state["slot"] = intent_slots
 #        pprint(session_state.get("slot"))
+        for text in amount_say:
+            mqtt_client.put_mqtt(MQTT_IP_ADDR, MQTT_PORT, 'hermes/tts/say', '{"text": "' + text + '", "siteId": "' + session_state.get("siteId") + '"}', MQTT_USER, MQTT_PASS)
         say = ['Rozpoczynam odliczanie', 'Czas start!']
-        mqtt_client.put_mqtt(MQTT_IP_ADDR, MQTT_PORT, 'hermes/tts/say', '{"text": "' + random.choice(say) +  '", "siteId": "' + session_state.get("siteId") + '"}', MQTT_USER, MQTT_PASS)
+        mqtt_client.put_mqtt(MQTT_IP_ADDR, MQTT_PORT, 'hermes/tts/say', '{"text": "' + random.choice(say) + '", "siteId": "' + session_state.get("siteId") + '"}', MQTT_USER, MQTT_PASS)
         hermes.publish_end_session(session_id, None)
-        os.system('./timer.py ' + session_state.get("siteId") + ' ' + str(int(total_amount)) + ' &')
+        os.system('./timer.py ' + session_state.get("siteId") + ' ' + str(int(total_seconds)) + ' &')
+
+def format_unit_days(amount):
+    return {
+        1: "dzień"
+    }.get(amount, "dni")
+
+def format_unit_hour(amount):
+    index = amount % 10
+    return {
+        1: "godzina",
+        5: "godzin",
+        6: "godzin",
+        7: "godzin",
+        8: "godzin",
+        9: "godzin",
+    }.get(index, "godziny")
+
+def format_unit_minutes(amount):
+    index = amount % 10
+    return {
+        1: "minuta",
+        5: "minut",
+        6: "minut",
+        7: "minut",
+        8: "minut",
+        9: "minut"
+    }.get(index, "minuty")
+
+def format_unit_seconds(amount):
+    index = amount % 10
+    return {
+        1: "sekunda",
+        5: "sekund",
+        6: "sekund",
+        7: "sekund",
+        8: "sekund",
+        9: "sekund"
+    }.get(index, "sekundy")
+
+def format_amount(amount):
+    return {
+        1: "jedna",
+        2: "dwie"
+    }.get(amount, str(amount))
 
 with Hermes(MQTT_ADDR) as h:
     h.subscribe_intents(start_session).start()
