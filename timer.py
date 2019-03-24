@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 from hermes_python.hermes import Hermes
 from hermes_python.ontology import *
-import sys
-#import binascii
-#import wave
 import paho.mqtt.publish as paho_publisher
 import paho.mqtt.client as paho_client
 import mqtt_client
+import snips_timer as st
 import io, time, configparser, sys
 from pprint import pprint
 
@@ -29,11 +27,16 @@ def on_message(client, userdata, msg):
     if (int(msg.payload) == amount) or (int(msg.payload) == 0):
         global active
         active = 0
-        mqtt_client.put('hermes/tts/say', '{"text": "' + 'Przerywam odliczanie' + '", "siteId": "' + site_id + '"}')
+        amount_say = st.get_amount_say(amount)
+        pprint(amount_say)
+        text_all = "Przerywam odliczanie"
+        for text in amount_say:
+            text_all = text_all + " " + text
+        mqtt_client.put('hermes/tts/say', '{"text": "' + text_all + '", "siteId": "' + site_id + '"}')
         client.loop_stop()
 #        sys.exit()
 
-client = paho_client.Client("timer")
+client = paho_client.Client("timer-" + site_id + "-" + str(amount))
 client.on_connect = on_connect
 client.on_message = on_message
 client.connect(mqtt_client.get_addr(), mqtt_client.get_port(), 60)

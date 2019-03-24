@@ -78,3 +78,26 @@ def format_amount(amount):
         1: "jedna",
         2: "dwie"
     }.get(amount, str(amount))
+
+def get_amount_say(amount):
+    days = int(amount // 86400)
+    amount = amount % 86400
+    hours = int(amount // 3600)
+    amount = amount % 3600
+    minutes = int(amount // 60)
+    amount = amount % 60
+    seconds = int(amount)
+#        print(days)
+#        print(hours)
+#        print(minutes)
+#        print(seconds)
+    amount_say = []
+    if days > 0:
+        amount_say.append(str(days) + " " + format_unit_days(days))
+    if hours > 0:
+        amount_say.append(format_amount(hours) + " " + format_unit_hour(hours))
+    if minutes > 0:
+        amount_say.append(format_amount(minutes) + " " + format_unit_minutes(minutes))
+    if seconds > 0:
+        amount_say.append(format_amount(seconds) + " " + format_unit_seconds(seconds))
+    return amount_say
