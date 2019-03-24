@@ -43,3 +43,38 @@ def get_unit_multiplier(unit):
         "hour": 3600,
         "day" : 86400
     }.get(unit, 1)
+
+def format_unit_days(amount):
+    return {
+        1: "dzień"
+    }.get(amount, "dni")
+
+def format_unit_hour(amount):
+    return {
+        1: "godzina",
+        2: "godziny",
+        3: "godziny",
+        4: "godziny"
+    }.get(amount, "godzin")
+
+def format_unit_minutes(amount):
+    return {
+        1: "minuta",
+        2: "minuty",
+        3: "minuty",
+        4: "minuty"
+    }.get(amount, "minut")
+
+def format_unit_seconds(amount):
+    return {
+        1: "sekunda",
+        2: "sekundy",
+        3: "sekundy",
+        4: "sekundy"
+    }.get(amount, "sekund")
+
+def format_amount(amount):
+    return {
+        1: "jedna",
+        2: "dwie"
+    }.get(amount, str(amount))

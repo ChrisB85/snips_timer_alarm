@@ -1,16 +1,43 @@
 #!/usr/bin/env python3
+from hermes_python.hermes import Hermes
+from hermes_python.ontology import *
 import sys
-import binascii
-import wave
-import paho.mqtt.publish as publish
-import config as c
-import io, time, configparser
+#import binascii
+#import wave
+import paho.mqtt.publish as paho_publisher
+import paho.mqtt.client as paho_client
+import mqtt_client
+import io, time, configparser, sys
 from pprint import pprint
 
 site_id = str(sys.argv[1])
 amount = int(sys.argv[2])
-
+global active
+active = 1
 #pprint(file)
+
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code " + str(rc))
+
+    # Subscribing in on_connect() means that if we lose the connection and
+    # reconnect then subscriptions will be renewed.
+    client.subscribe("timer/countdown_interrupt/" + site_id)
+
+def on_message(client, userdata, msg):
+    print("Topic: " + msg.topic + " Payload: " + str(msg.payload))
+#    pprint(str(msg.payload) == "b''")
+    if (int(msg.payload) == amount) or (int(msg.payload) == 0):
+        global active
+        active = 0
+        mqtt_client.put('hermes/tts/say', '{"text": "' + 'Przerywam odliczanie' + '", "siteId": "' + site_id + '"}')
+        client.loop_stop()
+#        sys.exit()
+
+client = paho_client.Client("timer")
+client.on_connect = on_connect
+client.on_message = on_message
+client.connect(mqtt_client.get_addr(), mqtt_client.get_port(), 60)
+client.loop_start()
 
 time.sleep(amount)
 
@@ -23,4 +50,8 @@ filename = "Mp3-alarm-clock.wav"
 binaryFile = open("./sounds/" + filename, 'rb')
 wav = bytearray(binaryFile.read())
 
-publish.single("hermes/audioServer/{}/playBytes/123".format(site_id), wav, hostname="localhost", port=1883)
+play_id = site_id + "-" + str(amount)
+
+if active == 1:
+    paho_publisher.single("hermes/audioServer/{}/playBytes/{}".format(site_id, play_id), wav, hostname="localhost", port=1883)
+client.loop_stop()
