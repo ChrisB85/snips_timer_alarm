@@ -39,9 +39,7 @@ def start_session(hermes, intent_message):
         return
 
     print("Starting device control session " + session_id)
-    session_state = {"siteId": site_id, "topic": get_intent_msg(intent_message), "slot": []}
 
-    # device = intent_message.slots.device.first()
     intent_slots = st.get_intent_slots(intent_message)
     time_units = st.get_time_units(intent_message)
     if len(intent_slots) < len(time_units):
@@ -63,7 +61,7 @@ def start_session(hermes, intent_message):
             try:
                 amount = float(st.get_intent_amount(value))
             except ValueError:
-                print("That's not an float!")
+                print("Error: That's not an float!")
                 hermes.publish_end_session(session_id, "Przepraszam, nie zrozumiałem")
             total_amount = amount * st.get_unit_multiplier(time_units[key]) + total_amount
         # Interrupt
@@ -72,15 +70,13 @@ def start_session(hermes, intent_message):
             hermes.publish_end_session(session_id, None)
             sys.exit()
 
-        session_state["slot"] = intent_slots
-
         amount_say = st.get_amount_say(total_amount)
         for text in amount_say:
-            mqtt_client.put('hermes/tts/say', '{"text": "' + text + '", "siteId": "' + session_state.get("siteId") + '"}')
+            mqtt_client.put('hermes/tts/say', '{"text": "' + text + '", "siteId": "' + site_id + '"}')
         say = ['Rozpoczynam odliczanie', 'Czas start!']
-        mqtt_client.put('hermes/tts/say', '{"text": "' + random.choice(say) + '", "siteId": "' + session_state.get("siteId") + '"}')
+        mqtt_client.put('hermes/tts/say', '{"text": "' + random.choice(say) + '", "siteId": "' + site_id + '"}')
         hermes.publish_end_session(session_id, None)
-        os.system('./timer.py ' + session_state.get("siteId") + ' ' + str(int(total_amount)) + ' &')
+        os.system('./timer.py ' + site_id + ' ' + str(int(total_amount)) + ' &')
 
 with Hermes(mqtt_client.get_addr_port()) as h:
     h.subscribe_intents(start_session).start()
