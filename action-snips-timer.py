@@ -75,6 +75,7 @@ def start_session(hermes, intent_message):
         amount_say.append(random.choice(say))
         for text in amount_say:
             mqtt_client.put('hermes/tts/say', '{"text": "' + text + '", "siteId": "' + site_id + '"}')
+            time.sleep(1)
         hermes.publish_end_session(session_id, None)
         os.system('./timer.py ' + site_id + ' ' + str(int(total_amount)) + ' "' + target + '" &')
 
