@@ -1,0 +1,10 @@
+[global]
+prefix = kblachowicz:
+intent = countdown,countdown_interrupt
+alarm_file = alert.wav
+
+[secret]
+host = localhost
+port = 1883
+user =
+pass =

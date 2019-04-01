@@ -1,3 +1,5 @@
+from pprint import pprint
+
 def get_intent_amount(x):
 #    print(type(x))
     if isinstance(x, int):
@@ -7,6 +9,7 @@ def get_intent_amount(x):
           return float(x.replace(" i pół", ".5"))
       except ValueError:
           return {
+              "pół": 0.5,
               "jedną": 1,
               "dwie": 2,
               "półtorej": 1.5,
@@ -41,8 +44,23 @@ def get_locations(intent_message):
     if (intent_message.slots is None):
         return slots
     slots_count = len(intent_message.slots.location)
+    object = intent_message.slots
+    object_methods = [method_name for method_name in dir(object)
+                  if callable(getattr(object, method_name))]
+#    pprint(object_methods)
+#    pprint(intent_message.slots.items())
+#    pprint(intent_message.slots.values())
     for x in range(slots_count):
         slots.append(intent_message.slots.location[x].slot_value.value.value)
+    return slots
+
+def get_targets(intent_message):
+    slots = []
+    if (intent_message.slots is None):
+        return slots
+    slots_count = len(intent_message.slots.time_target)
+    for x in range(slots_count):
+        slots.append(intent_message.slots.time_target[x].slot_value.value.value)
     return slots
 
 def get_unit_multiplier(unit):

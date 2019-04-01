@@ -10,6 +10,7 @@ from pprint import pprint
 
 site_id = str(sys.argv[1])
 amount = int(sys.argv[2])
+target = str(sys.argv[3])
 global active
 active = 1
 #pprint(file)
@@ -39,16 +40,13 @@ def on_message(client, userdata, msg):
 client = paho_client.Client("timer-" + site_id + "-" + str(amount))
 client.on_connect = on_connect
 client.on_message = on_message
+client.username_pw_set(mqtt_client.get_user(), mqtt_client.get_pass())
 client.connect(mqtt_client.get_addr(), mqtt_client.get_port(), 60)
 client.loop_start()
 
 time.sleep(amount)
 
-#filename = "rooster_alarm.wav"
-#filename = "Loud-alarm-clock-sound.wav"
-#filename = "Alarm-clock-sound-short.wav"
-#filename = "Alarm-tone.wav"
-filename = "Mp3-alarm-clock.wav"
+filename = mqtt_client.get_config().get('global', 'alarm_file')
 
 binaryFile = open("./sounds/" + filename, 'rb')
 wav = bytearray(binaryFile.read())
@@ -56,5 +54,8 @@ wav = bytearray(binaryFile.read())
 play_id = site_id + "-" + str(amount)
 
 if active == 1:
-    paho_publisher.single("hermes/audioServer/{}/playBytes/{}".format(site_id, play_id), wav, hostname="localhost", port=1883)
+    auth = {'username': mqtt_client.get_user(), 'password': mqtt_client.get_pass()}
+    if len(target) > 0:
+        mqtt_client.put('hermes/tts/say', '{"text": "' + 'Czas na ' + target + '!", "siteId": "' + site_id + '"}')
+    paho_publisher.single("hermes/audioServer/{}/playBytes/{}".format(site_id, play_id), wav, hostname = mqtt_client.get_addr(), port = mqtt_client.get_port(), auth = auth)
 client.loop_stop()

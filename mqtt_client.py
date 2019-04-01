@@ -1,9 +1,13 @@
+from hermes_python.hermes import Hermes
+from hermes_python.ffi.utils import MqttOptions
 import paho.mqtt.client as mqtt
-import configparser
+import configparser, os, shutil
 
-CONFIGURATION_ENCODING_FORMAT = "utf-8"
 CONFIG_INI = "config.ini"
+
 Config = configparser.ConfigParser()
+if not os.path.exists(CONFIG_INI):
+    shutil.copyfile(CONFIG_INI + '.default', CONFIG_INI)
 Config.read(CONFIG_INI)
 
 MQTT_ADDR = Config.get('secret', 'host')
@@ -28,6 +32,9 @@ def put(topic, payload):
             time.sleep(100.0 / 1000.0)
     client.disconnect()
 
+def get_config():
+    return Config
+
 def get_addr():
     return MQTT_ADDR
 
@@ -42,3 +49,6 @@ def get_pass():
 
 def get_addr_port():
     return MQTT_ADDR_PORT
+
+def get_mqtt_options():
+    return MqttOptions(username = get_user(), password = get_pass(), broker_address = get_addr_port())
