@@ -53,7 +53,7 @@ def start_session(hermes, intent_message):
         if intent_msg_name == 'countdown_interrupt':
             mqtt_client.put('timer/countdown_interrupt/' + site_id, 0)
         hermes.publish_end_session(session_id, None)
-        sys.exit()
+        return
     else:
         # Get seconds amount
         total_amount = 0
@@ -68,7 +68,7 @@ def start_session(hermes, intent_message):
         if intent_msg_name == 'countdown_interrupt':
             mqtt_client.put('timer/countdown_interrupt/' + site_id, int(total_amount))
             hermes.publish_end_session(session_id, None)
-            sys.exit()
+            return
 
         amount_say = st.get_amount_say(total_amount)
         say = ['Rozpoczynam odliczanie', 'Czas start!']
