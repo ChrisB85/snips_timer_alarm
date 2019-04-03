@@ -29,7 +29,7 @@ def start_session(hermes, intent_message):
         site_id = locations[0]
     target = ''
     targets = st.get_targets(intent_message)
-    pprint(targets)
+    #pprint(targets)
 
     if len(targets) > 0:
         target = targets[0]
