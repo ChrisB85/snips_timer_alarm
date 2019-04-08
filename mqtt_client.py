@@ -1,7 +1,12 @@
 from hermes_python.hermes import Hermes
 from hermes_python.ffi.utils import MqttOptions
 import paho.mqtt.client as mqtt
-import configparser, os, shutil
+import os, shutil
+import toml
+try:
+    import configparser as configparser
+except ImportError:
+    import ConfigParser as configparser
 
 CONFIG_INI = "config.ini"
 
@@ -10,11 +15,26 @@ if not os.path.exists(CONFIG_INI):
     shutil.copyfile(CONFIG_INI + '.default', CONFIG_INI)
 Config.read(CONFIG_INI)
 
-MQTT_ADDR = Config.get('secret', 'host')
-MQTT_PORT = Config.get('secret', 'port')
-MQTT_USER = Config.get('secret', 'user')
-MQTT_PASS = Config.get('secret', 'pass')
-MQTT_ADDR_PORT = "{}:{}".format(MQTT_ADDR, str(MQTT_PORT))
+TOML_PATH = '/etc/snips.toml'
+
+# Get the MQTT host and port from /etc/snips.toml.
+try:
+    TOML = toml.load(TOML_PATH)
+    MQTT_ADDR_PORT = TOML['snips-common']['mqtt']
+    MQTT_ADDR, MQTT_PORT = MQTT_ADDR_PORT.split(':')
+    MQTT_PORT = int(mqtt_port)
+except (KeyError, ValueError):
+    MQTT_ADDR = 'localhost'
+    MQTT_PORT = 1883
+    MQTT_ADDR_PORT = "{}:{}".format(MQTT_ADDR, str(MQTT_PORT))
+
+try:
+    TOML = toml.load(TOML_PATH)
+    MQTT_USER = TOML['snips-common']['mqtt_username']
+    MQTT_PASS = TOML['snips-common']['mqtt_password']
+except (KeyError, ValueError):
+    MQTT_USER = ''
+    MQTT_PASS = ''
 
 def put(topic, payload):
     client = mqtt.Client("Client")  # create new instance

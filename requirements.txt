@@ -1,3 +1,4 @@
 hermes_python>=0.1
 future
 paho-mqtt
+toml
