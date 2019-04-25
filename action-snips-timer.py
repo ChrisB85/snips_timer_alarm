@@ -13,6 +13,8 @@ INTENT_FILTER_START_SESSION = []
 for x in intents:
     INTENT_FILTER_START_SESSION.append(x.strip())
 
+prefix = mqtt_client.get_config().get('global', 'prefix')
+
 def get_intent_site_id(intent_message):
     return intent_message.site_id
 
@@ -71,7 +73,7 @@ def start_session(hermes, intent_message):
             return
 
         amount_say = st.get_amount_say(total_amount)
-        say = ['Rozpoczynam odliczanie', 'Czas start!']
+        say = ['Rozpoczynam odliczanie', 'Czas start!', 'Odliczam']
         amount_say.append(random.choice(say))
         for text in amount_say:
             mqtt_client.put('hermes/tts/say', '{"text": "' + text + '", "siteId": "' + site_id + '"}')
@@ -80,4 +82,6 @@ def start_session(hermes, intent_message):
         os.system('./timer.py ' + site_id + ' ' + str(int(total_amount)) + ' "' + target + '" &')
 
 with Hermes(mqtt_options = mqtt_client.get_mqtt_options()) as h:
-    h.subscribe_intents(start_session).start()
+    for a in INTENT_FILTER_START_SESSION:
+        h.subscribe_intent(prefix + a, start_session)
+    h.start()
