@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 from hermes_python.hermes import Hermes
 from hermes_python.ontology import *
-import random
-import os, sys
+import random, os, sys, io, time, json
+import snips_common as sc
 import snips_timer as st
 import mqtt_client
-import io, time
 from pprint import pprint
 
 intents = mqtt_client.get_config().get('global', 'intent').split(",")
@@ -24,6 +23,7 @@ def get_intent_msg(intent_message):
 
 
 def start_session(hermes, intent_message):
+    print("Timer session_start")
     session_id = intent_message.session_id
     site_id = get_intent_site_id(intent_message)
     locations = st.get_locations(intent_message)
@@ -37,8 +37,8 @@ def start_session(hermes, intent_message):
         target = targets[0]
     intent_msg_name = get_intent_msg(intent_message)
 
-    if intent_msg_name not in INTENT_FILTER_START_SESSION:
-        return
+#    if intent_msg_name not in INTENT_FILTER_START_SESSION:
+#        return
 
     print("Starting device control session " + session_id)
 
@@ -76,8 +76,7 @@ def start_session(hermes, intent_message):
         say = ['Rozpoczynam odliczanie', 'Czas start!', 'Odliczam']
         amount_say.append(random.choice(say))
         for text in amount_say:
-            mqtt_client.put('hermes/tts/say', '{"text": "' + text + '", "siteId": "' + site_id + '"}')
-            time.sleep(1)
+            sc.put_notification(site_id, text)
         hermes.publish_end_session(session_id, None)
         os.system('./timer.py ' + site_id + ' ' + str(int(total_amount)) + ' "' + target + '" &')
 

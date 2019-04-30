@@ -4,6 +4,7 @@ from hermes_python.ontology import *
 import paho.mqtt.publish as paho_publisher
 import paho.mqtt.client as paho_client
 import mqtt_client
+import snips_common as sc
 import snips_timer as st
 import io, time, configparser, sys
 from pprint import pprint
@@ -33,7 +34,7 @@ def on_message(client, userdata, msg):
         text_all = "Przerywam odliczanie"
         for text in amount_say:
             text_all = text_all + " " + text
-        mqtt_client.put('hermes/tts/say', '{"text": "' + text_all + '", "siteId": "' + site_id + '"}')
+        sc.put_notification(site_id, text_all)
         client.loop_stop()
 #        sys.exit()
 
