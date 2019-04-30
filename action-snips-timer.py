@@ -57,6 +57,8 @@ def start_session(hermes, intent_message):
         hermes.publish_end_session(session_id, None)
         return
     else:
+        hermes.publish_end_session(session_id, None)
+
         # Get seconds amount
         total_amount = 0
         for key, value in enumerate(intent_slots):
@@ -77,7 +79,7 @@ def start_session(hermes, intent_message):
         amount_say.append(random.choice(say))
         for text in amount_say:
             sc.put_notification(site_id, text)
-        hermes.publish_end_session(session_id, None)
+        #hermes.publish_end_session(session_id, None)
         os.system('./timer.py ' + site_id + ' ' + str(int(total_amount)) + ' "' + target + '" &')
 
 with Hermes(mqtt_options = mqtt_client.get_mqtt_options()) as h:

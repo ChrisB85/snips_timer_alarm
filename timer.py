@@ -6,7 +6,7 @@ import paho.mqtt.client as paho_client
 import mqtt_client
 import snips_common as sc
 import snips_timer as st
-import io, time, configparser, sys
+import io, time, configparser, sys, uuid
 from pprint import pprint
 
 site_id = str(sys.argv[1])
@@ -38,7 +38,8 @@ def on_message(client, userdata, msg):
         client.loop_stop()
 #        sys.exit()
 
-client = paho_client.Client("timer-" + site_id + "-" + str(amount))
+client_id = "timer-" + site_id + "-" + str(amount) + "-" + str(uuid.uuid1())
+client = paho_client.Client(client_id)
 client.on_connect = on_connect
 client.on_message = on_message
 client.username_pw_set(mqtt_client.get_user(), mqtt_client.get_pass())
@@ -52,11 +53,9 @@ filename = mqtt_client.get_config().get('global', 'alarm_file')
 binaryFile = open("./sounds/" + filename, 'rb')
 wav = bytearray(binaryFile.read())
 
-play_id = site_id + "-" + str(amount)
-
 if active == 1:
     auth = {'username': mqtt_client.get_user(), 'password': mqtt_client.get_pass()}
     if len(target) > 0:
         mqtt_client.put('hermes/tts/say', '{"text": "' + 'Czas na ' + target + '!", "siteId": "' + site_id + '"}')
-    paho_publisher.single("hermes/audioServer/{}/playBytes/{}".format(site_id, play_id), wav, hostname = mqtt_client.get_addr(), port = mqtt_client.get_port(), auth = auth)
+    paho_publisher.single("hermes/audioServer/{}/playBytes/{}".format(site_id, client_id), wav, hostname = mqtt_client.get_addr(), port = mqtt_client.get_port(), auth = auth)
 client.loop_stop()
