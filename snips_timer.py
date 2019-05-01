@@ -128,3 +128,15 @@ def get_amount_say(amount):
     if seconds > 0:
         amount_say.append(format_amount(seconds) + " " + format_unit_seconds(seconds))
     return amount_say
+
+def get_amount_say_string(amount):
+    amount_say = get_amount_say(amount)
+    text_all = ""
+    for num, text in enumerate(amount_say, start=1):
+        if num == 1:
+            text_all = text_all + text
+        elif num != len(amount_say):
+            text_all = text_all + ", " + text
+        else:
+            text_all = text_all + ", " + text
+    return text_all

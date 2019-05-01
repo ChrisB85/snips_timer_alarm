@@ -6,7 +6,7 @@ import paho.mqtt.client as paho_client
 import mqtt_client
 import snips_common as sc
 import snips_timer as st
-import io, time, configparser, sys, uuid
+import io, time, configparser, sys, uuid, datetime
 from pprint import pprint
 
 site_id = str(sys.argv[1])
@@ -14,6 +14,8 @@ amount = int(sys.argv[2])
 target = str(sys.argv[3])
 global active
 active = 1
+global current_dt
+end_timestamp = int(datetime.datetime.now().timestamp()) + amount
 #pprint(file)
 
 def on_connect(client, userdata, flags, rc):
@@ -22,21 +24,26 @@ def on_connect(client, userdata, flags, rc):
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
     client.subscribe("timer/countdown_interrupt/" + site_id)
+    client.subscribe("timer/countdown_left/" + site_id)
 
 def on_message(client, userdata, msg):
     print("Topic: " + msg.topic + " Payload: " + str(msg.payload))
 #    pprint(str(msg.payload) == "b''")
     if (int(msg.payload) == amount) or (int(msg.payload) == 0):
-        global active
-        active = 0
-        amount_say = st.get_amount_say(amount)
-        pprint(amount_say)
-        text_all = "Przerywam odliczanie"
-        for text in amount_say:
-            text_all = text_all + " " + text
-        sc.put_notification(site_id, text_all)
-        client.loop_stop()
-#        sys.exit()
+        if msg.topic.startswith('timer/countdown_interrupt'):
+            global active
+            active = 0
+            text_all = "Przerywam odliczanie "
+            text_all = text_all + st.get_amount_say_string(amount)
+            sc.put_notification(site_id, text_all)
+            client.loop_stop()
+#            sys.exit()
+        if msg.topic.startswith('timer/countdown_left'):
+            now = int(datetime.datetime.now().timestamp())
+            left = end_timestamp - now
+            text_all = "Pozostało "
+            text_all = text_all + st.get_amount_say_string(left) + " z " + st.get_amount_say_string(amount)
+            sc.put_notification(site_id, text_all)
 
 client_id = "timer-" + site_id + "-" + str(amount) + "-" + str(uuid.uuid1())
 client = paho_client.Client(client_id)

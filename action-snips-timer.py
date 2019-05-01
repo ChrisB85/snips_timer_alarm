@@ -52,8 +52,8 @@ def start_session(hermes, intent_message):
 #    pprint(time_units)
     if len(intent_slots) == 0 or len(time_units) == 0:
         # Interrupt
-        if intent_msg_name == 'countdown_interrupt':
-            mqtt_client.put('timer/countdown_interrupt/' + site_id, 0)
+        if intent_msg_name == 'countdown_interrupt' or intent_msg_name == 'countdown_left':
+            mqtt_client.put('timer/' + intent_msg_name + '/' + site_id, 0)
         hermes.publish_end_session(session_id, None)
         return
     else:
@@ -69,8 +69,8 @@ def start_session(hermes, intent_message):
                 hermes.publish_end_session(session_id, "Przepraszam, nie zrozumiałem")
             total_amount = amount * st.get_unit_multiplier(time_units[key]) + total_amount
         # Interrupt
-        if intent_msg_name == 'countdown_interrupt':
-            mqtt_client.put('timer/countdown_interrupt/' + site_id, int(total_amount))
+        if intent_msg_name == 'countdown_interrupt' or intent_msg_name == 'countdown_left':
+            mqtt_client.put('timer/' + intent_msg_name + '/' + site_id, int(total_amount))
             hermes.publish_end_session(session_id, None)
             return
 
