@@ -82,7 +82,7 @@ def start_session(hermes, intent_message):
         #hermes.publish_end_session(session_id, None)
         os.system('./timer.py ' + site_id + ' ' + str(int(total_amount)) + ' "' + target + '" &')
 
-with Hermes(mqtt_options = mqtt_client.get_mqtt_options()) as h:
+with Hermes(mqtt_options = sc.get_hermes_mqtt_options()) as h:
     for a in INTENT_FILTER_START_SESSION:
         h.subscribe_intent(prefix + a, start_session)
     h.start()

@@ -1,7 +1,9 @@
-import mqtt_client
-import json
-import uuid
+import mqtt_client, json, uuid
 import paho.mqtt.publish as paho_publisher
+try:
+    from hermes_python.ffi.utils import MqttOptions
+except ImportError:
+    None
 
 def get_session_id(intent_message):
     return intent_message.session_id
@@ -11,6 +13,9 @@ def get_site_id(intent_message):
 
 def get_intent_name(intent_message):
     return intent_message.intent.intent_name.split(':')[-1]
+
+def get_hermes_mqtt_options():
+    return MqttOptions(username = mqtt_client.get_user(), password = mqtt_client.get_pass(), broker_address = mqtt_client.get_addr_port())
 
 def put_notification(site_id, text):
     data = {}

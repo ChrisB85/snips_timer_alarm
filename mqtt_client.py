@@ -1,8 +1,5 @@
-from hermes_python.hermes import Hermes
-from hermes_python.ffi.utils import MqttOptions
+import os, shutil, toml
 import paho.mqtt.client as mqtt
-import os, shutil
-import toml
 try:
     import configparser as configparser
 except ImportError:
@@ -69,6 +66,3 @@ def get_pass():
 
 def get_addr_port():
     return MQTT_ADDR_PORT
-
-def get_mqtt_options():
-    return MqttOptions(username = get_user(), password = get_pass(), broker_address = get_addr_port())
