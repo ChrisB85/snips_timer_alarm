@@ -14,9 +14,7 @@ for x in intents:
 
 prefix = mqtt_client.get_config().get('global', 'prefix')
 
-#with open('./timers.txt') as json_file:
-#    data = json.load(json_file)
-#    for timer in data['people']:
+st.check_timers()
 
 def get_intent_site_id(intent_message):
     return intent_message.site_id
@@ -85,17 +83,20 @@ def start_session(hermes, intent_message):
             sc.put_notification(site_id, text)
         #hermes.publish_end_session(session_id, None)
 
-        end_time = int((time.time() * 1000) + (amount * 1000))
-        data = []
+        end_time = int((time.time() * 1000) + (total_amount * 1000))
+        with open('./timers.txt') as json_file:
+            data = json.load(json_file)
         data_json = {}
         data_json["site_id"] = site_id
         data_json["target"] = target
+        data_json["amount"] = total_amount
         data_json["end_time"] = end_time
         data.append(data_json)
         with open('./timers.txt', 'w') as outfile:
             json.dump(data, outfile)
 
-        os.system('./timer.py ' + site_id + ' ' + str(int(total_amount)) + ' ' + str(end_time) + ' "' + target + '" &')
+        st.call_timer(site_id, total_amount, end_time, target)
+        #os.system('./timer.py ' + site_id + ' ' + str(int(total_amount)) + ' ' + str(end_time) + ' "' + target + '" &')
 
 with Hermes(mqtt_options = sc.get_hermes_mqtt_options()) as h:
     for a in INTENT_FILTER_START_SESSION:

@@ -37,10 +37,11 @@ def on_message(client, userdata, msg):
             text_all = text_all + st.get_amount_say_string(amount)
             sc.put_notification(site_id, text_all)
             client.loop_stop()
+            st.remove_timer(site_id, amount, end_timestamp, target)
 #            sys.exit()
         if msg.topic.startswith('timer/countdown_left'):
             now = int(datetime.datetime.now().timestamp())
-            left = end_timestamp - now
+            left = (end_timestamp / 1000) - now
             text_all = "Pozostało "
             text_all = text_all + st.get_amount_say_string(left) + " z " + st.get_amount_say_string(amount)
             sc.put_notification(site_id, text_all)
@@ -67,3 +68,5 @@ if active == 1:
         mqtt_client.put('hermes/tts/say', '{"text": "' + 'Czas na ' + target + '!", "siteId": "' + site_id + '"}')
     paho_publisher.single("hermes/audioServer/{}/playBytes/{}".format(site_id, client_id), wav, hostname = mqtt_client.get_addr(), port = mqtt_client.get_port(), auth = auth)
 client.loop_stop()
+
+st.check_timers()
