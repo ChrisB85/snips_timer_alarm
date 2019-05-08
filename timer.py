@@ -11,11 +11,11 @@ from pprint import pprint
 
 site_id = str(sys.argv[1])
 amount = int(sys.argv[2])
-target = str(sys.argv[3])
+end_timestamp = int(sys.argv[3])
+target = str(sys.argv[4])
 global active
 active = 1
 global current_dt
-end_timestamp = int(datetime.datetime.now().timestamp()) + amount
 #pprint(file)
 
 def on_connect(client, userdata, flags, rc):
@@ -53,7 +53,8 @@ client.username_pw_set(mqtt_client.get_user(), mqtt_client.get_pass())
 client.connect(mqtt_client.get_addr(), mqtt_client.get_port(), 60)
 client.loop_start()
 
-time.sleep(amount)
+while end_timestamp > int((time.time() * 1000)):
+    time.sleep(1)
 
 filename = mqtt_client.get_config().get('global', 'alarm_file')
 

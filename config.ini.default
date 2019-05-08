@@ -1,4 +1,4 @@
 [global]
 prefix = kblachowicz:
-intent = countdown,countdown_interrupt,countdown_left
+intent = countdown,countdown_interrupt,countdown_left,alarm
 alarm_file = alert.wav
