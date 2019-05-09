@@ -1,32 +1,59 @@
 from pprint import pprint
 import json, time, os, io
 
+global timers_file
+timers_file = './timers.json'
+alarms_file = './alarms.json'
+
 def call_timer(site_id, total_amount, end_time, target):
     os.system('./timer.py ' + site_id + ' ' + str(int(total_amount)) + ' ' + str(end_time) + ' "' + str(target) + '" &')
 
+def handle_file(file_path):
+    try:
+        fp = open(file_path)
+    except IOError:
+        # If not exists, create the file
+        fp = open(file_path, 'w+')
+        data = []
+        json.dump(data, fp)
+
 def check_timers():
-    with open('./timers.txt') as json_file:
+    handle_file(timers_file)
+    with open(timers_file) as json_file:
         data = json.load(json_file)
         new_data = []
         for timer in data:
             if int(timer['end_time']) > int(time.time() * 1000):
                 new_data.append(timer)
                 call_timer(timer['site_id'], timer['amount'], timer['end_time'], timer['target'])
-        with open('./timers.txt', 'w') as outfile:
+        with open(timers_file, 'w') as outfile:
             json.dump(new_data, outfile)
 
+def add_timer(site_id, amount, end_time, target):
+    handle_file(timers_file)
+    with open(timers_file) as json_file:
+        data = json.load(json_file)
+    data_json = {}
+    data_json["site_id"] = site_id
+    data_json["amount"] = amount
+    data_json["end_time"] = end_time
+    data_json["target"] = target
+    data.append(data_json)
+    with open(timers_file, 'w') as outfile:
+        json.dump(data, outfile)
+
 def remove_timer(site_id, amount, end_time, target):
-    with open('./timers.txt') as json_file:
+    handle_file(timers_file)
+    with open(timers_file) as json_file:
         data = json.load(json_file)
         new_data = []
         for timer in data:
             if site_id != timer['site_id'] and amount != timer['amount'] and end_time != timer['end_time']:
                 new_data.append(timer)
-        with open('./timers.txt', 'w') as outfile:
+        with open(timers_file, 'w') as outfile:
             json.dump(new_data, outfile)
 
 def get_intent_amount(x):
-#    print(type(x))
     if isinstance(x, int):
         return x
     else:

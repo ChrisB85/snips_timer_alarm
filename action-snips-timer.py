@@ -14,6 +14,7 @@ for x in intents:
 
 prefix = mqtt_client.get_config().get('global', 'prefix')
 
+# Check existing timers
 st.check_timers()
 
 def get_intent_site_id(intent_message):
@@ -49,9 +50,6 @@ def start_session(hermes, intent_message):
     if len(intent_slots) < len(time_units):
         intent_slots.insert(0, 1)
 
-#    pprint(intent_msg_name)
-#    pprint(intent_slots)
-#    pprint(time_units)
     if len(intent_slots) == 0 or len(time_units) == 0:
         # Interrupt
         if intent_msg_name == 'countdown_interrupt' or intent_msg_name == 'countdown_left':
@@ -84,19 +82,12 @@ def start_session(hermes, intent_message):
         #hermes.publish_end_session(session_id, None)
 
         end_time = int((time.time() * 1000) + (total_amount * 1000))
-        with open('./timers.txt') as json_file:
-            data = json.load(json_file)
-        data_json = {}
-        data_json["site_id"] = site_id
-        data_json["target"] = target
-        data_json["amount"] = total_amount
-        data_json["end_time"] = end_time
-        data.append(data_json)
-        with open('./timers.txt', 'w') as outfile:
-            json.dump(data, outfile)
 
+        # Add new timer
+        st.add_timer(site_id, total_amount, end_time, target)
+
+        # Call timer
         st.call_timer(site_id, total_amount, end_time, target)
-        #os.system('./timer.py ' + site_id + ' ' + str(int(total_amount)) + ' ' + str(end_time) + ' "' + target + '" &')
 
 with Hermes(mqtt_options = sc.get_hermes_mqtt_options()) as h:
     for a in INTENT_FILTER_START_SESSION:
