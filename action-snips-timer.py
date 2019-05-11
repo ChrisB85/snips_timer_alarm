@@ -25,11 +25,6 @@ def get_intent_site_id(intent_message):
 def get_intent_msg(intent_message):
     return intent_message.intent.intent_name.split(':')[-1]
 
-#alarm_time = datetime.datetime.today().strftime('%Y-%m-%d ') + "7:00"
-#adate = datetime.datetime.strptime(alarm_time, "%Y-%m-%d %H:%M").date()
-#next = adate + datetime.timedelta(days=1)
-#pprint(next)
-
 
 def start_session(hermes, intent_message):
     print("Timer session_start")
@@ -45,9 +40,6 @@ def start_session(hermes, intent_message):
     if len(targets) > 0:
         target = targets[0]
     intent_msg_name = get_intent_msg(intent_message)
-
-#    if intent_msg_name not in INTENT_FILTER_START_SESSION:
-#        return
 
     print("Starting device control session " + session_id)
 
@@ -65,43 +57,22 @@ def start_session(hermes, intent_message):
         else:
             hour = alarm_time_str
     else:
-        hour = None
+        hour = ''
 
     if len(intent_slots) < len(time_units):
         intent_slots.insert(0, 1)
+    # Get seconds amount
+    total_amount = 0
+    for key, value in enumerate(intent_slots):
+        try:
+            amount = float(st.get_intent_amount(value))
+        except ValueError:
+            print("Error: That's not an float!")
+            hermes.publish_end_session(session_id, "Przepraszam, nie zrozumiałem")
+        total_amount = amount * st.get_unit_multiplier(time_units[key]) + total_amount
 
-    if len(intent_slots) == 0 or len(time_units) == 0:
-        # Interrupt
-        if intent_msg_name == 'countdown_interrupt' or intent_msg_name == 'countdown_left':
-            mqtt_client.put('timer/' + intent_msg_name + '/' + site_id, 0)
-
-        if intent_msg_name == 'alarm' and hour is not None:
-            st.add_alarm(site_id, hour, target)
-            st.call_alarm(site_id, hour, target)
-            say = ['OK, godzina', 'Jasne, godzina']
-            alarm_say = random.choice(say)
-            alarm_say = alarm_say + " " + hours[0]
-            sc.put_notification(site_id, alarm_say)
-
+    if intent_msg_name == 'countdown':
         hermes.publish_end_session(session_id, None)
-        return
-    else:
-        hermes.publish_end_session(session_id, None)
-
-        # Get seconds amount
-        total_amount = 0
-        for key, value in enumerate(intent_slots):
-            try:
-                amount = float(st.get_intent_amount(value))
-            except ValueError:
-                print("Error: That's not an float!")
-                hermes.publish_end_session(session_id, "Przepraszam, nie zrozumiałem")
-            total_amount = amount * st.get_unit_multiplier(time_units[key]) + total_amount
-        # Interrupt
-        if intent_msg_name == 'countdown_interrupt' or intent_msg_name == 'countdown_left':
-            mqtt_client.put('timer/' + intent_msg_name + '/' + site_id, int(total_amount))
-            hermes.publish_end_session(session_id, None)
-            return
 
         amount_say = st.get_amount_say(total_amount)
         say = ['Rozpoczynam odliczanie', 'Czas start!', 'Odliczam']
@@ -117,6 +88,27 @@ def start_session(hermes, intent_message):
 
         # Call timer
         st.call_timer(site_id, total_amount, end_time, target)
+
+
+    if intent_msg_name == 'countdown_interrupt' or intent_msg_name == 'countdown_left':
+        hermes.publish_end_session(session_id, None)
+        if len(intent_slots) == 0 or len(time_units) == 0:
+            mqtt_client.put('timer/' + intent_msg_name + '/' + site_id, 0)
+        else:
+            mqtt_client.put('timer/' + intent_msg_name + '/' + site_id, int(total_amount))
+
+    if intent_msg_name == 'alarm' and len(hours) > 0:
+        st.add_alarm(site_id, hour, target)
+        st.call_alarm(site_id, hour, target)
+        say = ['OK, godzina', 'Jasne, godzina']
+        alarm_say = random.choice(say)
+        alarm_say = alarm_say + " " + hours[0]
+        sc.put_notification(site_id, alarm_say)
+        hermes.publish_end_session(session_id, None)
+
+    if intent_msg_name == 'alarm_interrupt':
+       mqtt_client.put('timer/' + intent_msg_name + '/' + site_id, hour)
+
 
 with Hermes(mqtt_options = sc.get_hermes_mqtt_options()) as h:
     for a in INTENT_FILTER_START_SESSION:

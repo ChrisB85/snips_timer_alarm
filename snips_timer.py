@@ -2,6 +2,7 @@ from pprint import pprint
 import json, time, os, io
 from dateutil import tz
 import datetime
+from dateutil import tz
 
 global timers_file
 timers_file = './timers.json'
@@ -41,8 +42,10 @@ def check_alarms(call = False):
         data = json.load(json_file)
         new_data = []
         for alarm in data:
+            if alarm['hour'] is None:
+                continue
             alarm_datetime = datetime.datetime.strptime(alarm['hour'], "%Y-%m-%d %H:%M")
-            if time.mktime(alarm_datetime.timetuple()) > time.mktime(time.gmtime()):
+            if datetime.datetime.timestamp(alarm_datetime) > datetime.datetime.timestamp(datetime.datetime.now()):
                 new_data.append(alarm)
                 if call:
                     call_alarm(alarm['site_id'], alarm['hour'], alarm['target'])
@@ -83,6 +86,17 @@ def remove_timer(site_id, amount, end_time, target):
             if site_id != timer['site_id'] and amount != timer['amount'] and end_time != timer['end_time']:
                 new_data.append(timer)
         with open(timers_file, 'w') as outfile:
+            json.dump(new_data, outfile)
+
+def remove_alarm(site_id, hour, target):
+    handle_file(alarms_file)
+    with open(alarms_file) as json_file:
+        data = json.load(json_file)
+        new_data = []
+        for alarm in data:
+            if site_id != alarm['site_id'] and hour != alarm['hour']:
+                new_data.append(alarm)
+        with open(alarms_file, 'w') as outfile:
             json.dump(new_data, outfile)
 
 def get_intent_amount(x):

@@ -29,25 +29,37 @@ def on_connect(client, userdata, flags, rc):
 
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    client.subscribe("timer/countdown_interrupt/" + site_id)
-    client.subscribe("timer/countdown_left/" + site_id)
+    if end_timestamp is not None and amount is not None:
+        client.subscribe("timer/countdown_interrupt/" + site_id)
+        client.subscribe("timer/countdown_left/" + site_id)
+    if hour is not None:
+        client.subscribe("timer/alarm_interrupt/" + site_id)
 
 def on_message(client, userdata, msg):
     print("Topic: " + msg.topic + " Payload: " + str(msg.payload))
-    if (int(msg.payload) == amount) or (int(msg.payload) == 0):
-        if msg.topic.startswith('timer/countdown_interrupt'):
-            global active
+
+    global active
+    if msg.topic.startswith('timer/alarm_interrupt'):
+        active = 0
+        alarm_datetime = datetime.datetime.strptime(hour, "%Y-%m-%d %H:%M")
+        text = "Wyłączam alarm zaplanowany na godzinę {}".format(alarm_datetime.strftime("%H:%M"))
+        sc.put_notification(site_id, text)
+        client.loop_stop()
+        st.remove_alarm(site_id, hour, target)
+
+    if msg.topic.startswith('timer/countdown_interrupt'):
+        if (int(msg.payload) == amount) or (int(msg.payload) == 0):
             active = 0
             text = "Przerywam odliczanie {}".format(st.get_amount_say_string(amount))
             sc.put_notification(site_id, text)
             client.loop_stop()
             st.remove_timer(site_id, amount, end_timestamp, target)
-#            sys.exit()
-        if msg.topic.startswith('timer/countdown_left'):
-            now = int(time.time())
-            left = (end_timestamp / 1000) - now
-            text = "Pozostało {} z {}".format(st.get_amount_say_string(left), st.get_amount_say_string(amount))
-            sc.put_notification(site_id, text)
+
+    if msg.topic.startswith('timer/countdown_left'):
+        now = int(time.time())
+        left = (end_timestamp / 1000) - now
+        text = "Pozostało {} z {}".format(st.get_amount_say_string(left), st.get_amount_say_string(amount))
+        sc.put_notification(site_id, text)
 
 client_id = "timer-" + site_id + "-" + str(uuid.uuid1())
 client = paho_client.Client(client_id)
