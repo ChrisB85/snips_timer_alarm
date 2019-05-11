@@ -61,7 +61,7 @@ if amount is not None:
     while active == 1 and end_timestamp > int((time.time() * 1000)):
         time.sleep(1)
 else:
-    while active == 1 and st.get_local_time(time.gmtime()) != hour:
+    while active == 1 and datetime.datetime.today().strftime('%Y-%m-%d %H:%M') != hour:
         time.sleep(1)
 
 filename = mqtt_client.get_config().get('global', 'alarm_file')
@@ -74,3 +74,4 @@ if active == 1:
 
 client.loop_stop()
 st.check_timers()
+st.check_alarms()

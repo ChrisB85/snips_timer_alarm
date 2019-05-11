@@ -15,7 +15,8 @@ for x in intents:
 prefix = mqtt_client.get_config().get('global', 'prefix')
 
 # Check existing timers
-st.check_timers()
+st.check_timers(True)
+st.check_alarms(True)
 
 def get_intent_site_id(intent_message):
     return intent_message.site_id
@@ -23,6 +24,11 @@ def get_intent_site_id(intent_message):
 
 def get_intent_msg(intent_message):
     return intent_message.intent.intent_name.split(':')[-1]
+
+#alarm_time = datetime.datetime.today().strftime('%Y-%m-%d ') + "7:00"
+#adate = datetime.datetime.strptime(alarm_time, "%Y-%m-%d %H:%M").date()
+#next = adate + datetime.timedelta(days=1)
+#pprint(next)
 
 
 def start_session(hermes, intent_message):
@@ -48,6 +54,18 @@ def start_session(hermes, intent_message):
     intent_slots = st.get_intent_slots(intent_message)
     time_units = st.get_time_units(intent_message)
     hours = st.get_hours(intent_message)
+    if len(hours) > 0:
+        alarm_time_str = datetime.datetime.today().strftime('%Y-%m-%d ') + hours[0]
+        alarm_datetime = datetime.datetime.strptime(alarm_time_str, "%Y-%m-%d %H:%M")
+        pprint(alarm_datetime)
+        if time.mktime(alarm_datetime.timetuple()) <= time.mktime(time.gmtime()):
+            next_date = alarm_datetime + datetime.timedelta(days=1)
+            pprint(next_date)
+            hour = next_date.strftime("%Y-%m-%d %H:%M")
+        else:
+            hour = alarm_time_str
+    else:
+        hour = None
 
     if len(intent_slots) < len(time_units):
         intent_slots.insert(0, 1)
@@ -57,9 +75,13 @@ def start_session(hermes, intent_message):
         if intent_msg_name == 'countdown_interrupt' or intent_msg_name == 'countdown_left':
             mqtt_client.put('timer/' + intent_msg_name + '/' + site_id, 0)
 
-        if intent_msg_name == 'alarm' and len(hours) > 0:
-            st.add_alarm(site_id, hours[0], target)
-            st.call_alarm(site_id, hours[0], target)
+        if intent_msg_name == 'alarm' and hour is not None:
+            st.add_alarm(site_id, hour, target)
+            st.call_alarm(site_id, hour, target)
+            say = ['OK, godzina', 'Jasne, godzina']
+            alarm_say = random.choice(say)
+            alarm_say = alarm_say + " " + hours[0]
+            sc.put_notification(site_id, alarm_say)
 
         hermes.publish_end_session(session_id, None)
         return

@@ -11,7 +11,7 @@ def call_timer(site_id, total_amount, end_time, target):
     os.system('./timer.py ' + site_id + ' ' + str(int(total_amount)) + ' ' + str(end_time) + ' "' + str(target) + '" &')
 
 def call_alarm(site_id, hour, target):
-    os.system('./timer.py ' + site_id + ' alarm ' + str(hour) + ' "' + str(target) + '" &')
+    os.system('./timer.py ' + site_id + ' alarm "' + str(hour) + '" "' + str(target) + '" &')
 
 def handle_file(file_path):
     try:
@@ -22,7 +22,7 @@ def handle_file(file_path):
         data = []
         json.dump(data, fp)
 
-def check_timers():
+def check_timers(call = False):
     handle_file(timers_file)
     with open(timers_file) as json_file:
         data = json.load(json_file)
@@ -30,8 +30,23 @@ def check_timers():
         for timer in data:
             if int(timer['end_time']) > int(time.time() * 1000):
                 new_data.append(timer)
-                call_timer(timer['site_id'], timer['amount'], timer['end_time'], timer['target'])
+                if call:
+                    call_timer(timer['site_id'], timer['amount'], timer['end_time'], timer['target'])
         with open(timers_file, 'w') as outfile:
+            json.dump(new_data, outfile)
+
+def check_alarms(call = False):
+    handle_file(alarms_file)
+    with open(alarms_file) as json_file:
+        data = json.load(json_file)
+        new_data = []
+        for alarm in data:
+            alarm_datetime = datetime.datetime.strptime(alarm['hour'], "%Y-%m-%d %H:%M")
+            if time.mktime(alarm_datetime.timetuple()) > time.mktime(time.gmtime()):
+                new_data.append(alarm)
+                if call:
+                    call_alarm(alarm['site_id'], alarm['hour'], alarm['target'])
+        with open(alarms_file, 'w') as outfile:
             json.dump(new_data, outfile)
 
 def add_timer(site_id, amount, end_time, target):
@@ -219,13 +234,15 @@ def get_amount_say_string(amount):
             text_all = text_all + ", " + text
     return text_all
 
-def get_local_time(utc_time):
+def get_local_datetime(utc_time = None, format = "%Y-%m-%d %H:%M:%S"):
+  if utc_time is None:
+    utc_time = time.gmtime()
   utc_time_h_m = time.strftime("%Y-%m-%d %H:%M:%S+00:00", utc_time)
   from_zone = tz.tzutc()
   to_zone = tz.tzlocal()
   utc = datetime.datetime.strptime(utc_time_h_m, "%Y-%m-%d %H:%M:%S+00:00")
   utc = utc.replace(tzinfo=from_zone)
   local = utc.astimezone(to_zone)
-  return_time = local.strftime("%H:%M")
+  return_time = local.strftime(format)
 #  print(return_time)
   return return_time
