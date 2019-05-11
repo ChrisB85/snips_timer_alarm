@@ -69,6 +69,7 @@ def start_session(hermes, intent_message):
         except ValueError:
             print("Error: That's not an float!")
             hermes.publish_end_session(session_id, "Przepraszam, nie zrozumiałem")
+            return
         total_amount = amount * st.get_unit_multiplier(time_units[key]) + total_amount
 
     if intent_msg_name == 'countdown':
@@ -100,7 +101,7 @@ def start_session(hermes, intent_message):
     if intent_msg_name == 'alarm' and len(hours) > 0:
         st.add_alarm(site_id, hour, target)
         st.call_alarm(site_id, hour, target)
-        say = ['OK, godzina', 'Jasne, godzina']
+        say = ['OK, godzina', 'Jasne, godzina', 'Planuję alarm, godzina']
         alarm_say = random.choice(say)
         alarm_say = alarm_say + " " + hours[0]
         sc.put_notification(site_id, alarm_say)

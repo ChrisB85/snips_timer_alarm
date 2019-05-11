@@ -40,12 +40,14 @@ def on_message(client, userdata, msg):
 
     global active
     if msg.topic.startswith('timer/alarm_interrupt'):
-        active = 0
-        alarm_datetime = datetime.datetime.strptime(hour, "%Y-%m-%d %H:%M")
-        text = "Wyłączam alarm zaplanowany na godzinę {}".format(alarm_datetime.strftime("%H:%M"))
-        sc.put_notification(site_id, text)
-        client.loop_stop()
-        st.remove_alarm(site_id, hour, target)
+        payload_hour = str(msg.payload.decode("utf-8", "ignore"))
+        if (payload_hour == '') or (payload_hour == hour):
+            active = 0
+            alarm_datetime = datetime.datetime.strptime(hour, "%Y-%m-%d %H:%M")
+            text = "Wyłączam alarm zaplanowany na godzinę {}".format(alarm_datetime.strftime("%H:%M"))
+            sc.put_notification(site_id, text)
+            client.loop_stop()
+            st.remove_alarm(site_id, hour, target)
 
     if msg.topic.startswith('timer/countdown_interrupt'):
         if (int(msg.payload) == amount) or (int(msg.payload) == 0):
