@@ -10,12 +10,19 @@ import io, time, configparser, sys, uuid, datetime
 from pprint import pprint
 
 site_id = str(sys.argv[1])
-amount = int(sys.argv[2])
-end_timestamp = int(sys.argv[3]) # in milliseconds
+
+if str(sys.argv[2]) == "alarm":
+    hour = str(sys.argv[3])
+    amount = None
+    end_timestamp = None
+else:
+    hour = None
+    amount = int(sys.argv[2])
+    end_timestamp = int(sys.argv[3]) # in milliseconds
+
 target = str(sys.argv[4])
 global active
 active = 1
-global current_dt
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
@@ -42,7 +49,7 @@ def on_message(client, userdata, msg):
             text = "Pozostało {} z {}".format(st.get_amount_say_string(left), st.get_amount_say_string(amount))
             sc.put_notification(site_id, text)
 
-client_id = "timer-" + site_id + "-" + str(amount) + "-" + str(uuid.uuid1())
+client_id = "timer-" + site_id + "-" + str(uuid.uuid1())
 client = paho_client.Client(client_id)
 client.on_connect = on_connect
 client.on_message = on_message
@@ -50,8 +57,12 @@ client.username_pw_set(mqtt_client.get_user(), mqtt_client.get_pass())
 client.connect(mqtt_client.get_addr(), mqtt_client.get_port(), 60)
 client.loop_start()
 
-while active == 1 and end_timestamp > int((time.time() * 1000)):
-    time.sleep(1)
+if amount is not None:
+    while active == 1 and end_timestamp > int((time.time() * 1000)):
+        time.sleep(1)
+else:
+    while active == 1 and st.get_local_time(time.gmtime()) != hour:
+        time.sleep(1)
 
 filename = mqtt_client.get_config().get('global', 'alarm_file')
 

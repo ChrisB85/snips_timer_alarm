@@ -1,5 +1,7 @@
 from pprint import pprint
 import json, time, os, io
+from dateutil import tz
+import datetime
 
 global timers_file
 timers_file = './timers.json'
@@ -7,6 +9,9 @@ alarms_file = './alarms.json'
 
 def call_timer(site_id, total_amount, end_time, target):
     os.system('./timer.py ' + site_id + ' ' + str(int(total_amount)) + ' ' + str(end_time) + ' "' + str(target) + '" &')
+
+def call_alarm(site_id, hour, target):
+    os.system('./timer.py ' + site_id + ' alarm ' + str(hour) + ' "' + str(target) + '" &')
 
 def handle_file(file_path):
     try:
@@ -40,6 +45,18 @@ def add_timer(site_id, amount, end_time, target):
     data_json["target"] = target
     data.append(data_json)
     with open(timers_file, 'w') as outfile:
+        json.dump(data, outfile)
+
+def add_alarm(site_id, hour, target):
+    handle_file(alarms_file)
+    with open(alarms_file) as json_file:
+        data = json.load(json_file)
+    data_json = {}
+    data_json["site_id"] = site_id
+    data_json["hour"] = hour
+    data_json["target"] = target
+    data.append(data_json)
+    with open(alarms_file, 'w') as outfile:
         json.dump(data, outfile)
 
 def remove_timer(site_id, amount, end_time, target):
@@ -104,6 +121,15 @@ def get_locations(intent_message):
 #    pprint(intent_message.slots.values())
     for x in range(slots_count):
         slots.append(intent_message.slots.location[x].slot_value.value.value)
+    return slots
+
+def get_hours(intent_message):
+    slots = []
+    if (intent_message.slots is None):
+        return slots
+    slots_count = len(intent_message.slots.hour)
+    for x in range(slots_count):
+        slots.append(intent_message.slots.hour[x].slot_value.value.value)
     return slots
 
 def get_targets(intent_message):
@@ -192,3 +218,14 @@ def get_amount_say_string(amount):
         else:
             text_all = text_all + ", " + text
     return text_all
+
+def get_local_time(utc_time):
+  utc_time_h_m = time.strftime("%Y-%m-%d %H:%M:%S+00:00", utc_time)
+  from_zone = tz.tzutc()
+  to_zone = tz.tzlocal()
+  utc = datetime.datetime.strptime(utc_time_h_m, "%Y-%m-%d %H:%M:%S+00:00")
+  utc = utc.replace(tzinfo=from_zone)
+  local = utc.astimezone(to_zone)
+  return_time = local.strftime("%H:%M")
+#  print(return_time)
+  return return_time

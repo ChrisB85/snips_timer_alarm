@@ -47,6 +47,8 @@ def start_session(hermes, intent_message):
 
     intent_slots = st.get_intent_slots(intent_message)
     time_units = st.get_time_units(intent_message)
+    hours = st.get_hours(intent_message)
+
     if len(intent_slots) < len(time_units):
         intent_slots.insert(0, 1)
 
@@ -54,6 +56,11 @@ def start_session(hermes, intent_message):
         # Interrupt
         if intent_msg_name == 'countdown_interrupt' or intent_msg_name == 'countdown_left':
             mqtt_client.put('timer/' + intent_msg_name + '/' + site_id, 0)
+
+        if intent_msg_name == 'alarm' and len(hours) > 0:
+            st.add_alarm(site_id, hours[0], target)
+            st.call_alarm(site_id, hours[0], target)
+
         hermes.publish_end_session(session_id, None)
         return
     else:
