@@ -80,7 +80,6 @@ def start_session(hermes, intent_message):
         amount_say.append(random.choice(say))
         for text in amount_say:
             sc.put_notification(site_id, text)
-        #hermes.publish_end_session(session_id, None)
 
         end_time = int((time.time() * 1000) + (total_amount * 1000))
 
@@ -99,13 +98,13 @@ def start_session(hermes, intent_message):
             mqtt_client.put('timer/' + intent_msg_name + '/' + site_id, int(total_amount))
 
     if intent_msg_name == 'alarm' and len(hours) > 0:
+        hermes.publish_end_session(session_id, None)
         st.add_alarm(site_id, hour, target)
         st.call_alarm(site_id, hour, target)
         say = ['OK, godzina', 'Jasne, godzina', 'Planuję alarm, godzina']
         alarm_say = random.choice(say)
         alarm_say = alarm_say + " " + hours[0]
         sc.put_notification(site_id, alarm_say)
-        hermes.publish_end_session(session_id, None)
 
     if intent_msg_name == 'alarm_interrupt':
        mqtt_client.put('timer/' + intent_msg_name + '/' + site_id, hour)
