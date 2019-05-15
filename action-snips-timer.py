@@ -55,7 +55,7 @@ def start_session(hermes, intent_message):
             pprint(next_date)
             hour = next_date.strftime("%Y-%m-%d %H:%M")
         else:
-            hour = alarm_time_str
+            hour = alarm_datetime.strftime("%Y-%m-%d %H:%M")
     else:
         hour = ''
 
