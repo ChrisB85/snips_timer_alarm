@@ -52,7 +52,6 @@ def start_session(hermes, intent_message):
         pprint(alarm_datetime)
         if time.mktime(alarm_datetime.timetuple()) <= time.mktime(time.gmtime()):
             next_date = alarm_datetime + datetime.timedelta(days=1)
-            pprint(next_date)
             hour = next_date.strftime("%Y-%m-%d %H:%M")
         else:
             hour = alarm_datetime.strftime("%Y-%m-%d %H:%M")
