@@ -8,6 +8,58 @@ global timers_file
 timers_file = './timers.json'
 alarms_file = './alarms.json'
 
+def fix_time(time):
+    values = {'pierwszej': '1',
+              'pierwszą': '1',
+              'drugiej ': '2',
+              'drugą ': '2',
+              'trzeciej ': '3',
+              'trzecią ': '3',
+              'czwartej ': '4',
+              'czwartą ': '4',
+              'piątej ': '5',
+              'piątą ': '5',
+              'szóstej ': '6',
+              'szóstą ': '6',
+              'siódmej ': '7',
+              'siódmą ': '7',
+              'ósmej ': '8',
+              'ósmą ': '8',
+              'dziewiątej ': '9',
+              'dziewiątą ': '9',
+              'dzisiątej ': '10',
+              'dzisiątą ': '10',
+              'jedenastej ': '11',
+              'jedenastą ': '11',
+              'dwunastej ': '12',
+              'dwunastą ': '12',
+              'trzynastej ': '13',
+              'trzynastą ': '13',
+              'czternastej ': '14',
+              'czternastą ': '14',
+              'piętnastej ': '15',
+              'piętnastą ': '15',
+              'szesnastej ': '16',
+              'szesnastą ': '16',
+              'siedemnastej ': '17',
+              'siedemnastą ': '17',
+              'osiemnastej ': '18',
+              'osiemnastą ': '18',
+              'dziewiętnastej ': '19',
+              'dziewiętnastą ': '19',
+              'dwudziestej ': '20',
+              'dwudziestą ': '20',
+              'dwudziestej pierwszej ': '21',
+              'dwudzuestą pierwszą ': '21',
+              'dwudziestej drugiej ': '22',
+              'dwudzuestą drugą ': '22',
+              'dwudziestej trzeciej ': '23',
+              'dwudzuestą trzecią ': '23'}
+    for search in values:
+        replace = values[search]
+        time = time.replace(search, replace + ':')
+    return time
+
 def call_timer(site_id, total_amount, end_time, target):
     os.system('./timer.py ' + site_id + ' ' + str(int(total_amount)) + ' ' + str(end_time) + ' "' + str(target) + '" &')
 

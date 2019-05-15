@@ -14,6 +14,11 @@ for x in intents:
 
 prefix = mqtt_client.get_config().get('global', 'prefix')
 
+#t = st.fix_time('siódmej 5')
+#print(t)
+#test = datetime.datetime.strptime(t, "%H:%M")
+#print(test)
+
 # Check existing timers
 st.check_timers(True)
 st.check_alarms(True)
@@ -47,16 +52,18 @@ def start_session(hermes, intent_message):
     time_units = st.get_time_units(intent_message)
     hours = st.get_hours(intent_message)
     if len(hours) > 0:
-        alarm_time_str = datetime.datetime.today().strftime('%Y-%m-%d ') + hours[0]
+        alarm_time_str = datetime.datetime.today().strftime('%Y-%m-%d ') + st.fix_time(hours[0])
         alarm_datetime = datetime.datetime.strptime(alarm_time_str, "%Y-%m-%d %H:%M")
-        pprint(alarm_datetime)
         if time.mktime(alarm_datetime.timetuple()) <= time.mktime(time.gmtime()):
             next_date = alarm_datetime + datetime.timedelta(days=1)
             hour = next_date.strftime("%Y-%m-%d %H:%M")
+            hour_only = next_date.strftime("%H:%M")
         else:
             hour = alarm_datetime.strftime("%Y-%m-%d %H:%M")
+            hour_only = alarm_datetime.strftime("%H:%M")
     else:
         hour = ''
+        hour_only = ''
 
     if len(intent_slots) < len(time_units):
         intent_slots.insert(0, 1)
@@ -102,7 +109,7 @@ def start_session(hermes, intent_message):
         st.call_alarm(site_id, hour, target)
         say = ['OK, godzina', 'Jasne, godzina', 'Planuję alarm, godzina']
         alarm_say = random.choice(say)
-        alarm_say = alarm_say + " " + hours[0]
+        alarm_say = alarm_say + " " + hour_only
         sc.put_notification(site_id, alarm_say)
 
     if intent_msg_name == 'alarm_interrupt':
