@@ -54,7 +54,7 @@ def start_session(hermes, intent_message):
     if len(hours) > 0:
         alarm_time_str = datetime.datetime.today().strftime('%Y-%m-%d ') + st.fix_time(hours[0])
         alarm_datetime = datetime.datetime.strptime(alarm_time_str, "%Y-%m-%d %H:%M")
-        if time.mktime(alarm_datetime.timetuple()) <= time.mktime(time.gmtime()):
+        if datetime.datetime.timestamp(alarm_datetime) < datetime.datetime.timestamp(datetime.datetime.now()):
             next_date = alarm_datetime + datetime.timedelta(days=1)
             hour = next_date.strftime("%Y-%m-%d %H:%M")
             hour_only = next_date.strftime("%H:%M")
