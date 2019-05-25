@@ -156,7 +156,7 @@ def get_intent_amount(x):
         return x
     else:
       try:
-          return float(x.replace(" i pół", ".5"))
+          return float(x.replace(" i pół", ".5").replace(",", "."))
       except ValueError:
           return {
               "pół": 0.5,
