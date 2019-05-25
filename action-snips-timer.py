@@ -81,12 +81,6 @@ def start_session(hermes, intent_message):
     if intent_msg_name == 'countdown':
         hermes.publish_end_session(session_id, None)
 
-        amount_say = st.get_amount_say(total_amount)
-        say = ['Rozpoczynam odliczanie', 'Czas start!', 'Odliczam']
-        amount_say.append(random.choice(say))
-        for text in amount_say:
-            sc.put_notification(site_id, text)
-
         end_time = int((time.time() * 1000) + (total_amount * 1000))
 
         # Add new timer
@@ -95,6 +89,13 @@ def start_session(hermes, intent_message):
         # Call timer
         st.call_timer(site_id, total_amount, end_time, target)
 
+        # Say
+        amount_say = st.get_amount_say(total_amount)
+        say = ['Rozpoczynam odliczanie', 'Czas start!', 'Odliczam']
+        amount_say.append(random.choice(say))
+        for text in amount_say:
+            sc.put_notification(site_id, text)
+            time.sleep(0.2)
 
     if intent_msg_name == 'countdown_interrupt' or intent_msg_name == 'countdown_left':
         hermes.publish_end_session(session_id, None)
