@@ -91,7 +91,7 @@ def start_session(hermes, intent_message):
 
         # Say
         amount_say = st.get_amount_say(total_amount)
-        say = ['Rozpoczynam odliczanie', 'Czas start!', 'Odliczam']
+        say = ['Rozpoczynam odliczanie', 'Czas start!', 'Odliczam', 'Robi się']
         amount_say.append(random.choice(say))
         for text in amount_say:
             sc.put_notification(site_id, text)
@@ -108,7 +108,7 @@ def start_session(hermes, intent_message):
         hermes.publish_end_session(session_id, None)
         st.add_alarm(site_id, hour, target)
         st.call_alarm(site_id, hour, target)
-        say = ['OK, godzina', 'Jasne, godzina', 'Planuję alarm, godzina']
+        say = ['OK, godzina', 'Jasne, godzina', 'Planuję alarm, godzina', 'Dobrze, godzina']
         alarm_say = random.choice(say)
         alarm_say = alarm_say + " " + hour_only
         sc.put_notification(site_id, alarm_say)
