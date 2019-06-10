@@ -279,13 +279,13 @@ def get_amount_say(amount):
 #        print(seconds)
     amount_say = []
     if days > 0:
-        amount_say.append(str(days) + " " + format_unit_days(days))
+        amount_say.append(str(days) + "- " + format_unit_days(days))
     if hours > 0:
-        amount_say.append(format_amount(hours) + " " + format_unit_hour(hours))
+        amount_say.append(format_amount(hours) + "- " + format_unit_hour(hours))
     if minutes > 0:
-        amount_say.append(format_amount(minutes) + " " + format_unit_minutes(minutes))
+        amount_say.append(format_amount(minutes) + "- " + format_unit_minutes(minutes))
     if seconds > 0:
-        amount_say.append(format_amount(seconds) + " " + format_unit_seconds(seconds))
+        amount_say.append(format_amount(seconds) + "- " + format_unit_seconds(seconds))
     return amount_say
 
 def get_amount_say_string(amount):
