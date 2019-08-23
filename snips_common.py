@@ -29,7 +29,11 @@ def put_notification(site_id, text):
 def play_sound(site_id, file, play_id = None):
     if play_id is None:
         play_id = site_id + "-" + str(uuid.uuid1())
-    auth = {'username': mqtt_client.get_user(), 'password': mqtt_client.get_pass()}
+    mqtt_user = mqtt_client.get_user()
+    if len(mqtt_user) > 0:
+        auth = {'username': mqtt_user, 'password': mqtt_client.get_pass()}
+    else:
+        auth = {}
     binaryFile = open(file, 'rb')
     wav = bytearray(binaryFile.read())
     paho_publisher.single("hermes/audioServer/{}/playBytes/{}".format(site_id, play_id), wav, hostname = mqtt_client.get_addr(), port = mqtt_client.get_port(), auth = auth)
